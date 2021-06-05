@@ -4,10 +4,49 @@ version: 2.1
 orbs:
   # Declare a dependency on the welcome-orb
   welcome: circleci/welcome-orb@0.4.1
+  slack: circleci/slack@4.3
+
+jobs:
+  build-and-test:  
+    steps:
+      - slack/notify:
+          event: pass
+          custom: |
+            {
+               "blocks": [
+                  {
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": "🎉 빌드 및 업로드 성공! Docker 배포 진행중.."
+                      }
+                  }
+               ]
+            }
+      - slack/notify:
+        event: fail
+        custom: |
+          {
+              "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "열심히해라 이자식아"
+                    }
+                }
+              ]
+          }
+      - slack/notify:
+          branch_pattern: main
+          event: pass
+          template: basic_success_1 
+
 # Orchestrate or schedule a set of jobs
 workflows:
   # Name the workflow "welcome"
   welcome:
     # Run the welcome/run job in its own container
     jobs:
-      - welcome/run
+      - welcome/run:
+          context: slack-secrets
